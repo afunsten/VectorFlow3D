@@ -1,0 +1,408 @@
+#usda 1.0
+(
+    """
+    VectorFlow3D bootstrap layout: Pump Station 01.
+
+    Top-level facility ASSEMBLY. Component geometry is deferred behind `payload`
+    arcs (the interest/streaming quantum, spec 3.2 / Phase 2). Everything the
+    Logical Scene Graph needs to index WITHOUT loading payloads is authored here
+    on the instance prims: transform, extentsHint, vf identity/tags, and the
+    declarative vf:binding:* telemetry bindings (VictoriaMetrics / PromQL).
+
+    Hard rule (spec): no live telemetry values are stored in USD -- only
+    geometry/material/hierarchy/metadata DEFAULTS and declarative bindings.
+    See ./README.md for the vf: authoring convention.
+    """
+    defaultPrim = "PumpStation01"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "PumpStation01" (
+    kind = "assembly"
+    customData = {
+        dictionary vf = {
+            string class = "facility"
+            string site = "SITE-01"
+            string facilityTag = "PS-01"
+            string description = "Sample water pumping and distribution station"
+        }
+    }
+)
+{
+    # ---------------------------------------------------------------------
+    # Pump hall -- rotating equipment
+    # ---------------------------------------------------------------------
+    def Xform "PumpHall" (
+        kind = "group"
+        customData = {
+            dictionary vf = {
+                string zone = "pump_hall"
+            }
+        }
+    )
+    {
+        def Xform "Pump_01" (
+            prepend payload = @./components/pump.usda@</Pump>
+            customData = {
+                dictionary vf = {
+                    string assetTag = "PUMP-01"
+                    string[] tags = ["rotating_equipment", "zone:pump_hall", "duty"]
+                }
+            }
+        )
+        {
+            custom float3[] extentsHint = [(-1.6, -0.7, -0.7), (0.9, 0.7, 0.6)]
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+
+            custom string vf:binding:flow:sourceId = "victoriametrics"
+            custom string vf:binding:flow:query = "pump_flow_gpm{asset=\"PUMP-01\"}"
+            custom token vf:binding:flow:attribute = "flow"
+            custom token vf:binding:flow:unit = "gpm"
+            custom double vf:binding:flow:ttlMs = 5000
+            custom token vf:binding:flow:priority = "background"
+            custom token vf:binding:flow:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:dischargePressure:sourceId = "victoriametrics"
+            custom string vf:binding:dischargePressure:query = "pump_discharge_pressure_psi{asset=\"PUMP-01\"}"
+            custom token vf:binding:dischargePressure:attribute = "dischargePressure"
+            custom token vf:binding:dischargePressure:unit = "psi"
+            custom double vf:binding:dischargePressure:ttlMs = 5000
+            custom token vf:binding:dischargePressure:priority = "background"
+            custom token vf:binding:dischargePressure:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:motorTemp:sourceId = "victoriametrics"
+            custom string vf:binding:motorTemp:query = "pump_motor_temp_celsius{asset=\"PUMP-01\"}"
+            custom token vf:binding:motorTemp:attribute = "motorTemp"
+            custom token vf:binding:motorTemp:unit = "degC"
+            custom double vf:binding:motorTemp:ttlMs = 10000
+            custom token vf:binding:motorTemp:priority = "background"
+            custom token vf:binding:motorTemp:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:running:sourceId = "victoriametrics"
+            custom string vf:binding:running:query = "pump_running_state{asset=\"PUMP-01\"}"
+            custom token vf:binding:running:attribute = "running"
+            custom token vf:binding:running:unit = "bool"
+            custom double vf:binding:running:ttlMs = 2000
+            custom token vf:binding:running:priority = "high"
+            custom token vf:binding:running:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:vibration:sourceId = "victoriametrics"
+            custom string vf:binding:vibration:query = "pump_vibration_mm_s{asset=\"PUMP-01\"}"
+            custom token vf:binding:vibration:attribute = "vibration"
+            custom token vf:binding:vibration:unit = "mm/s"
+            custom double vf:binding:vibration:ttlMs = 5000
+            custom token vf:binding:vibration:priority = "background"
+            custom token vf:binding:vibration:qualityPolicy = "stale_ok"
+        }
+
+        def Xform "Pump_02" (
+            prepend payload = @./components/pump.usda@</Pump>
+            customData = {
+                dictionary vf = {
+                    string assetTag = "PUMP-02"
+                    string[] tags = ["rotating_equipment", "zone:pump_hall", "duty"]
+                }
+            }
+        )
+        {
+            custom float3[] extentsHint = [(-1.6, -0.7, -0.7), (0.9, 0.7, 0.6)]
+            double3 xformOp:translate = (0, 3, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+
+            custom string vf:binding:flow:sourceId = "victoriametrics"
+            custom string vf:binding:flow:query = "pump_flow_gpm{asset=\"PUMP-02\"}"
+            custom token vf:binding:flow:attribute = "flow"
+            custom token vf:binding:flow:unit = "gpm"
+            custom double vf:binding:flow:ttlMs = 5000
+            custom token vf:binding:flow:priority = "background"
+            custom token vf:binding:flow:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:dischargePressure:sourceId = "victoriametrics"
+            custom string vf:binding:dischargePressure:query = "pump_discharge_pressure_psi{asset=\"PUMP-02\"}"
+            custom token vf:binding:dischargePressure:attribute = "dischargePressure"
+            custom token vf:binding:dischargePressure:unit = "psi"
+            custom double vf:binding:dischargePressure:ttlMs = 5000
+            custom token vf:binding:dischargePressure:priority = "background"
+            custom token vf:binding:dischargePressure:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:motorTemp:sourceId = "victoriametrics"
+            custom string vf:binding:motorTemp:query = "pump_motor_temp_celsius{asset=\"PUMP-02\"}"
+            custom token vf:binding:motorTemp:attribute = "motorTemp"
+            custom token vf:binding:motorTemp:unit = "degC"
+            custom double vf:binding:motorTemp:ttlMs = 10000
+            custom token vf:binding:motorTemp:priority = "background"
+            custom token vf:binding:motorTemp:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:running:sourceId = "victoriametrics"
+            custom string vf:binding:running:query = "pump_running_state{asset=\"PUMP-02\"}"
+            custom token vf:binding:running:attribute = "running"
+            custom token vf:binding:running:unit = "bool"
+            custom double vf:binding:running:ttlMs = 2000
+            custom token vf:binding:running:priority = "high"
+            custom token vf:binding:running:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:vibration:sourceId = "victoriametrics"
+            custom string vf:binding:vibration:query = "pump_vibration_mm_s{asset=\"PUMP-02\"}"
+            custom token vf:binding:vibration:attribute = "vibration"
+            custom token vf:binding:vibration:unit = "mm/s"
+            custom double vf:binding:vibration:ttlMs = 5000
+            custom token vf:binding:vibration:priority = "background"
+            custom token vf:binding:vibration:qualityPolicy = "stale_ok"
+        }
+
+        def Xform "Pump_03" (
+            prepend payload = @./components/pump.usda@</Pump>
+            customData = {
+                dictionary vf = {
+                    string assetTag = "PUMP-03"
+                    string[] tags = ["rotating_equipment", "zone:pump_hall", "standby"]
+                }
+            }
+        )
+        {
+            custom float3[] extentsHint = [(-1.6, -0.7, -0.7), (0.9, 0.7, 0.6)]
+            double3 xformOp:translate = (0, 6, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+
+            custom string vf:binding:flow:sourceId = "victoriametrics"
+            custom string vf:binding:flow:query = "pump_flow_gpm{asset=\"PUMP-03\"}"
+            custom token vf:binding:flow:attribute = "flow"
+            custom token vf:binding:flow:unit = "gpm"
+            custom double vf:binding:flow:ttlMs = 5000
+            custom token vf:binding:flow:priority = "background"
+            custom token vf:binding:flow:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:dischargePressure:sourceId = "victoriametrics"
+            custom string vf:binding:dischargePressure:query = "pump_discharge_pressure_psi{asset=\"PUMP-03\"}"
+            custom token vf:binding:dischargePressure:attribute = "dischargePressure"
+            custom token vf:binding:dischargePressure:unit = "psi"
+            custom double vf:binding:dischargePressure:ttlMs = 5000
+            custom token vf:binding:dischargePressure:priority = "background"
+            custom token vf:binding:dischargePressure:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:motorTemp:sourceId = "victoriametrics"
+            custom string vf:binding:motorTemp:query = "pump_motor_temp_celsius{asset=\"PUMP-03\"}"
+            custom token vf:binding:motorTemp:attribute = "motorTemp"
+            custom token vf:binding:motorTemp:unit = "degC"
+            custom double vf:binding:motorTemp:ttlMs = 10000
+            custom token vf:binding:motorTemp:priority = "background"
+            custom token vf:binding:motorTemp:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:running:sourceId = "victoriametrics"
+            custom string vf:binding:running:query = "pump_running_state{asset=\"PUMP-03\"}"
+            custom token vf:binding:running:attribute = "running"
+            custom token vf:binding:running:unit = "bool"
+            custom double vf:binding:running:ttlMs = 2000
+            custom token vf:binding:running:priority = "high"
+            custom token vf:binding:running:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:vibration:sourceId = "victoriametrics"
+            custom string vf:binding:vibration:query = "pump_vibration_mm_s{asset=\"PUMP-03\"}"
+            custom token vf:binding:vibration:attribute = "vibration"
+            custom token vf:binding:vibration:unit = "mm/s"
+            custom double vf:binding:vibration:ttlMs = 5000
+            custom token vf:binding:vibration:priority = "background"
+            custom token vf:binding:vibration:qualityPolicy = "stale_ok"
+        }
+    }
+
+    # ---------------------------------------------------------------------
+    # Tank farm -- storage
+    # ---------------------------------------------------------------------
+    def Xform "TankFarm" (
+        kind = "group"
+        customData = {
+            dictionary vf = {
+                string zone = "tank_farm"
+            }
+        }
+    )
+    {
+        def Xform "Tank_A" (
+            prepend payload = @./components/tank.usda@</Tank>
+            customData = {
+                dictionary vf = {
+                    string assetTag = "TANK-A"
+                    string[] tags = ["storage", "zone:tank_farm"]
+                }
+            }
+        )
+        {
+            custom float3[] extentsHint = [(-1.7, -1.7, 0), (1.7, 1.7, 4.1)]
+            double3 xformOp:translate = (10, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+
+            custom string vf:binding:level:sourceId = "victoriametrics"
+            custom string vf:binding:level:query = "tank_level_pct{asset=\"TANK-A\"}"
+            custom token vf:binding:level:attribute = "level"
+            custom token vf:binding:level:unit = "pct"
+            custom double vf:binding:level:ttlMs = 5000
+            custom token vf:binding:level:priority = "background"
+            custom token vf:binding:level:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:volume:sourceId = "victoriametrics"
+            custom string vf:binding:volume:query = "tank_volume_gal{asset=\"TANK-A\"}"
+            custom token vf:binding:volume:attribute = "volume"
+            custom token vf:binding:volume:unit = "gal"
+            custom double vf:binding:volume:ttlMs = 5000
+            custom token vf:binding:volume:priority = "background"
+            custom token vf:binding:volume:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:temp:sourceId = "victoriametrics"
+            custom string vf:binding:temp:query = "tank_temp_celsius{asset=\"TANK-A\"}"
+            custom token vf:binding:temp:attribute = "temp"
+            custom token vf:binding:temp:unit = "degC"
+            custom double vf:binding:temp:ttlMs = 15000
+            custom token vf:binding:temp:priority = "background"
+            custom token vf:binding:temp:qualityPolicy = "stale_ok"
+        }
+
+        def Xform "Tank_B" (
+            prepend payload = @./components/tank.usda@</Tank>
+            customData = {
+                dictionary vf = {
+                    string assetTag = "TANK-B"
+                    string[] tags = ["storage", "zone:tank_farm"]
+                }
+            }
+        )
+        {
+            custom float3[] extentsHint = [(-1.7, -1.7, 0), (1.7, 1.7, 4.1)]
+            double3 xformOp:translate = (10, 6, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+
+            custom string vf:binding:level:sourceId = "victoriametrics"
+            custom string vf:binding:level:query = "tank_level_pct{asset=\"TANK-B\"}"
+            custom token vf:binding:level:attribute = "level"
+            custom token vf:binding:level:unit = "pct"
+            custom double vf:binding:level:ttlMs = 5000
+            custom token vf:binding:level:priority = "background"
+            custom token vf:binding:level:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:volume:sourceId = "victoriametrics"
+            custom string vf:binding:volume:query = "tank_volume_gal{asset=\"TANK-B\"}"
+            custom token vf:binding:volume:attribute = "volume"
+            custom token vf:binding:volume:unit = "gal"
+            custom double vf:binding:volume:ttlMs = 5000
+            custom token vf:binding:volume:priority = "background"
+            custom token vf:binding:volume:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:temp:sourceId = "victoriametrics"
+            custom string vf:binding:temp:query = "tank_temp_celsius{asset=\"TANK-B\"}"
+            custom token vf:binding:temp:attribute = "temp"
+            custom token vf:binding:temp:unit = "degC"
+            custom double vf:binding:temp:ttlMs = 15000
+            custom token vf:binding:temp:priority = "background"
+            custom token vf:binding:temp:qualityPolicy = "stale_ok"
+        }
+    }
+
+    # ---------------------------------------------------------------------
+    # Distribution -- electrical switchgear
+    # ---------------------------------------------------------------------
+    def Xform "Distribution" (
+        kind = "group"
+        customData = {
+            dictionary vf = {
+                string zone = "electrical_room"
+            }
+        }
+    )
+    {
+        def Xform "SWG_01" (
+            prepend payload = @./components/distribution_switch.usda@</DistributionSwitch>
+            customData = {
+                dictionary vf = {
+                    string assetTag = "SWG-01"
+                    string[] tags = ["electrical", "zone:electrical_room", "main"]
+                }
+            }
+        )
+        {
+            custom float3[] extentsHint = [(-0.4, -0.3, 0), (0.4, 0.3, 2.0)]
+            double3 xformOp:translate = (-6, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+
+            custom string vf:binding:loadCurrent:sourceId = "victoriametrics"
+            custom string vf:binding:loadCurrent:query = "switch_load_amps{asset=\"SWG-01\"}"
+            custom token vf:binding:loadCurrent:attribute = "loadCurrent"
+            custom token vf:binding:loadCurrent:unit = "A"
+            custom double vf:binding:loadCurrent:ttlMs = 3000
+            custom token vf:binding:loadCurrent:priority = "background"
+            custom token vf:binding:loadCurrent:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:busVoltage:sourceId = "victoriametrics"
+            custom string vf:binding:busVoltage:query = "switch_bus_voltage_volts{asset=\"SWG-01\"}"
+            custom token vf:binding:busVoltage:attribute = "busVoltage"
+            custom token vf:binding:busVoltage:unit = "V"
+            custom double vf:binding:busVoltage:ttlMs = 3000
+            custom token vf:binding:busVoltage:priority = "background"
+            custom token vf:binding:busVoltage:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:breakerClosed:sourceId = "victoriametrics"
+            custom string vf:binding:breakerClosed:query = "switch_breaker_closed_state{asset=\"SWG-01\"}"
+            custom token vf:binding:breakerClosed:attribute = "breakerClosed"
+            custom token vf:binding:breakerClosed:unit = "bool"
+            custom double vf:binding:breakerClosed:ttlMs = 2000
+            custom token vf:binding:breakerClosed:priority = "high"
+            custom token vf:binding:breakerClosed:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:switchTemp:sourceId = "victoriametrics"
+            custom string vf:binding:switchTemp:query = "switch_temp_celsius{asset=\"SWG-01\"}"
+            custom token vf:binding:switchTemp:attribute = "switchTemp"
+            custom token vf:binding:switchTemp:unit = "degC"
+            custom double vf:binding:switchTemp:ttlMs = 10000
+            custom token vf:binding:switchTemp:priority = "background"
+            custom token vf:binding:switchTemp:qualityPolicy = "stale_ok"
+        }
+
+        def Xform "SWG_02" (
+            prepend payload = @./components/distribution_switch.usda@</DistributionSwitch>
+            customData = {
+                dictionary vf = {
+                    string assetTag = "SWG-02"
+                    string[] tags = ["electrical", "zone:electrical_room", "feeder"]
+                }
+            }
+        )
+        {
+            custom float3[] extentsHint = [(-0.4, -0.3, 0), (0.4, 0.3, 2.0)]
+            double3 xformOp:translate = (-6, 4, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+
+            custom string vf:binding:loadCurrent:sourceId = "victoriametrics"
+            custom string vf:binding:loadCurrent:query = "switch_load_amps{asset=\"SWG-02\"}"
+            custom token vf:binding:loadCurrent:attribute = "loadCurrent"
+            custom token vf:binding:loadCurrent:unit = "A"
+            custom double vf:binding:loadCurrent:ttlMs = 3000
+            custom token vf:binding:loadCurrent:priority = "background"
+            custom token vf:binding:loadCurrent:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:busVoltage:sourceId = "victoriametrics"
+            custom string vf:binding:busVoltage:query = "switch_bus_voltage_volts{asset=\"SWG-02\"}"
+            custom token vf:binding:busVoltage:attribute = "busVoltage"
+            custom token vf:binding:busVoltage:unit = "V"
+            custom double vf:binding:busVoltage:ttlMs = 3000
+            custom token vf:binding:busVoltage:priority = "background"
+            custom token vf:binding:busVoltage:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:breakerClosed:sourceId = "victoriametrics"
+            custom string vf:binding:breakerClosed:query = "switch_breaker_closed_state{asset=\"SWG-02\"}"
+            custom token vf:binding:breakerClosed:attribute = "breakerClosed"
+            custom token vf:binding:breakerClosed:unit = "bool"
+            custom double vf:binding:breakerClosed:ttlMs = 2000
+            custom token vf:binding:breakerClosed:priority = "high"
+            custom token vf:binding:breakerClosed:qualityPolicy = "stale_ok"
+
+            custom string vf:binding:switchTemp:sourceId = "victoriametrics"
+            custom string vf:binding:switchTemp:query = "switch_temp_celsius{asset=\"SWG-02\"}"
+            custom token vf:binding:switchTemp:attribute = "switchTemp"
+            custom token vf:binding:switchTemp:unit = "degC"
+            custom double vf:binding:switchTemp:ttlMs = 10000
+            custom token vf:binding:switchTemp:priority = "background"
+            custom token vf:binding:switchTemp:qualityPolicy = "stale_ok"
+        }
+    }
+}

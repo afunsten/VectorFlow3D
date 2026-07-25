@@ -1,0 +1,36 @@
+# Edited version of pump-station-01.flow3d used to demonstrate an incremental
+# reload. Exactly one change vs the original: PUMP-01's efficiency binding gains
+# a `high` priority. Everything else is byte-identical in meaning, so the reload
+# diff is a single changed opinion and the RSG does not storm.
+
+scene "PumpStation01"
+
+part PUMP-01 {
+  tag "process:water_intake"
+  meta loop = "A"
+  anchor suction   at (-1.5, 0.0, 0.0)
+  anchor discharge at (0.9, 0.0, 0.0)
+  # Only edit: priority background -> high.
+  bind efficiency metric("pump_efficiency_pct{asset=\"PUMP-01\"}") unit "pct" ttl 10000ms priority high
+}
+
+part PUMP-02 {
+  tag "process:water_intake"
+  meta loop = "B"
+  anchor suction   at (-1.5, 0.0, 0.0)
+  anchor discharge at ( 0.9, 0.0, 0.0)
+  bind efficiency metric("pump_efficiency_pct{asset=\"PUMP-02\"}") unit "pct" ttl 10000ms priority background
+}
+
+part TANK-A {
+  anchor inlet  at (0.0, 0.0, 4.0)
+  anchor outlet at (0.0, 0.0, 0.2)
+}
+
+part TANK-B {
+  anchor inlet  at (0.0, 0.0, 4.0)
+  anchor outlet at (0.0, 0.0, 0.2)
+}
+
+pipe PUMP-01.discharge -> TANK-A.inlet
+pipe PUMP-02.discharge -> TANK-B.inlet

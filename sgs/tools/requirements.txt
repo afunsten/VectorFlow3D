@@ -1,0 +1,4 @@
+# OpenUSD core Python bindings (Usd, Sdf, Gf, Vt, Kind) — no Hydra/imaging
+# needed for Phase 1 indexing. Apache-2.0. Provides Stage.Open(..., LoadNone)
+# so the importer composes hierarchy + attributes WITHOUT loading payloads.
+usd-core==24.11

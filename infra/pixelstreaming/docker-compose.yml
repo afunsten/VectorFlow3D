@@ -1,0 +1,101 @@
+# VectorFlow3D — Pixel Streaming Infrastructure (Wilbur signalling + SFU) plus a
+# reference streamer that pushes synthetic test-pattern video over WebRTC.
+#
+# This stack is OPT-IN. The base infra/docker-compose.yml stays metrics-only and
+# does NOT include this file. Bring components up with profiles:
+#
+#   # Signalling only (Wilbur):
+#   docker compose -f infra/pixelstreaming/docker-compose.yml \
+#     --profile pixelstreaming up -d
+#
+#   # Signalling + reference streamer (watch the test pattern at http://localhost/):
+#   docker compose -f infra/pixelstreaming/docker-compose.yml \
+#     --profile pixelstreaming --profile streamer up -d --build
+#
+#   # Add the SFU (Linux hosts only — see the sfu service notes + README):
+#   docker compose -f infra/pixelstreaming/docker-compose.yml \
+#     --profile pixelstreaming --profile sfu up -d
+#
+# Renderer stance (spec 3.7 / Phase 7): reuse Epic's Wilbur (formerly "Cirrus")
+# signalling server + SFU. The reference streamer is the permanent integration /
+# CI harness and the exact seam the real O3DE Streamer replaces later (Phase 6/7).
+#
+# Domain boundary: nothing here receives VictoriaMetrics / PromQL URLs.
+
+name: vectorflow3d-pixelstreaming
+
+services:
+  # Wilbur: signalling web server (formerly Cirrus). Runs fine in standard
+  # bridge networking with normal port mapping — no host-networking needed.
+  signalling:
+    profiles: ["pixelstreaming"]
+    image: ${PS_SIGNALLING_IMAGE:-pixelstreamingunofficial/pixel-streaming-signalling-server:5.8}
+    container_name: vf-pixelstreaming-signalling
+    env_file:
+      - path: env.example
+        required: false
+    ports:
+      - "${PS_HTTP_PORT:-80}:80" # player / frontend web server (open in a browser)
+      - "${PS_STREAMER_PORT:-8888}:8888" # streamers (O3DE / reference streamer) connect here
+      - "${PS_SFU_PORT:-8889}:8889" # SFU connects here
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O - http://127.0.0.1:80/ >/dev/null 2>&1 || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  # Reference streamer: synthetic color-bars/test-pattern video pushed over the
+  # same WebRTC path the O3DE Streamer will use. See reference-streamer/README.md
+  # for the FrameSource seam and the explicit scope limitation (plumbing only).
+  reference-streamer:
+    profiles: ["streamer"]
+    build:
+      context: ./reference-streamer
+      dockerfile: Dockerfile
+    container_name: vf-pixelstreaming-streamer
+    depends_on:
+      signalling:
+        condition: service_healthy
+    env_file:
+      - path: env.example
+        required: false
+    environment:
+      PS_SIGNALLING_STREAMER_URL: ${PS_SIGNALLING_STREAMER_URL:-ws://signalling:8888}
+      PS_STREAM_WIDTH: ${PS_STREAM_WIDTH:-1280}
+      PS_STREAM_HEIGHT: ${PS_STREAM_HEIGHT:-720}
+      PS_STREAM_FPS: ${PS_STREAM_FPS:-30}
+      PS_STREAM_CODEC: ${PS_STREAM_CODEC:-h264}
+      PS_STREAM_PATTERN: ${PS_STREAM_PATTERN:-colorbars}
+      PS_STREAMER_ID: ${PS_STREAMER_ID:-vf-reference-streamer}
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # SFU (Selective Forwarding Unit) — Linux / CI standard path ONLY.
+  #
+  # Epic's SFU image REQUIRES Docker host networking (network_mode: host)
+  # because of how the SFU collects and reports its available WebRTC ports.
+  # This is Epic's OWN documented requirement, not a workaround we chose:
+  #   https://github.com/EpicGamesExt/PixelStreamingInfrastructure/blob/master/SFU/README.md
+  #
+  # Consequences:
+  #   * host networking is effectively Linux-only. Docker Desktop for macOS does
+  #     not implement it the same way, so on this Mac use the NATIVE SFU fallback
+  #     documented in ./README.md ("SFU on macOS"). Local Mac dev normally runs
+  #     signalling + reference-streamer WITHOUT the SFU at all.
+  #   * host networking bypasses compose service DNS, so SIGNALLING_URL must use
+  #     127.0.0.1 (the SFU port), NOT the "signalling" service name.
+  # ---------------------------------------------------------------------------
+  sfu:
+    profiles: ["sfu"]
+    image: ${PS_SFU_IMAGE:-pixelstreamingunofficial/pixel-streaming-sfu:5.8}
+    container_name: vf-pixelstreaming-sfu
+    network_mode: host
+    environment:
+      SIGNALLING_URL: ${PS_SFU_SIGNALLING_URL:-ws://127.0.0.1:8889}
+    restart: unless-stopped

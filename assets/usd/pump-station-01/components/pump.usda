@@ -1,0 +1,93 @@
+#usda 1.0
+(
+    """
+    VectorFlow3D component: centrifugal Pump.
+
+    Reusable component model (kind = "component") intended to be referenced or
+    payloaded by a facility assembly. Carries geometry + material + static
+    metadata DEFAULTS only. Live telemetry values are never authored here;
+    per-instance telemetry bindings (vf:binding:*) are authored on the
+    instancing prim in the assembly layer. See ../README.md.
+    """
+    defaultPrim = "Pump"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "Pump" (
+    kind = "component"
+    assetInfo = {
+        string name = "vf_pump"
+        string identifier = "components/pump.usda"
+    }
+    customData = {
+        dictionary vf = {
+            string class = "pump"
+            string category = "rotating_equipment"
+            string manufacturer = "Acme Fluid Systems"
+            string model = "CP-200"
+            string ratedPowerKw = "15"
+            string ratedFlowGpm = "300"
+        }
+    }
+)
+{
+    def Scope "Materials"
+    {
+        def Material "PumpSteel"
+        {
+            token outputs:surface.connect = </Pump/Materials/PumpSteel/Surface.outputs:surface>
+
+            def Shader "Surface"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.55, 0.57, 0.6)
+                float inputs:metallic = 1
+                float inputs:roughness = 0.4
+                token outputs:surface
+            }
+        }
+    }
+
+    def Scope "Geom"
+    {
+        # Horizontal pump casing (axis = X).
+        def Cylinder "Body" (
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            uniform token axis = "X"
+            double height = 1.6
+            double radius = 0.5
+            float3[] extent = [(-0.8, -0.5, -0.5), (0.8, 0.5, 0.5)]
+            rel material:binding = </Pump/Materials/PumpSteel>
+        }
+
+        # Drive motor, offset behind the casing.
+        def Cylinder "Motor" (
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            uniform token axis = "X"
+            double height = 0.8
+            double radius = 0.35
+            float3[] extent = [(-0.4, -0.35, -0.35), (0.4, 0.35, 0.35)]
+            rel material:binding = </Pump/Materials/PumpSteel>
+            double3 xformOp:translate = (-1.1, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        # Skid base plate.
+        def Cube "Skid" (
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            double size = 1
+            float3[] extent = [(-0.5, -0.5, -0.5), (0.5, 0.5, 0.5)]
+            rel material:binding = </Pump/Materials/PumpSteel>
+            double3 xformOp:translate = (-0.5, 0, -0.6)
+            double3 xformOp:scale = (2.6, 1.2, 0.2)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+    }
+}

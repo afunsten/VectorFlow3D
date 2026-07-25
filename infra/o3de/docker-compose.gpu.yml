@@ -1,0 +1,25 @@
+# GPU passthrough override for the O3DE client — Linux hosts ONLY.
+#
+# REQUIRES: Linux host + NVIDIA Container Toolkit.
+# Does NOT work on macOS Docker Desktop (no GPU passthrough for Linux images).
+#
+#   docker compose -f infra/o3de/docker-compose.yml -f infra/o3de/docker-compose.gpu.yml \
+#     --profile o3de-client up -d --build
+#
+# Layers the NVIDIA GPU reservation onto the portable base compose so the base
+# file can still start on hosts without an NVIDIA GPU (e.g. Apple Silicon).
+
+name: vectorflow3d-o3de
+
+services:
+  o3de-client:
+    environment:
+      NVIDIA_DRIVER_CAPABILITIES: compute,graphics,utility,video
+      NVIDIA_VISIBLE_DEVICES: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

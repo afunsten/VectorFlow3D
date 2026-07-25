@@ -1,0 +1,40 @@
+# Local O3DE client in a Linux Docker container.
+#
+# This base file is portable and runs anywhere Docker runs (incl. macOS /
+# Apple Silicon, emulated). It brings up the current o3de-client stub with NO
+# GPU reservation, so it starts on hosts without an NVIDIA GPU.
+#
+#   # Portable (macOS / no-GPU) — current working path:
+#   docker compose -f infra/o3de/docker-compose.yml --profile o3de-client up -d --build
+#
+#   # Linux + NVIDIA Container Toolkit (GPU passthrough) — add the gpu override:
+#   docker compose -f infra/o3de/docker-compose.yml -f infra/o3de/docker-compose.gpu.yml \
+#     --profile o3de-client up -d --build
+#
+# NOTE: macOS Docker Desktop cannot GPU-accelerate a Linux container, and the
+# image currently ships a stub entrypoint (no renderer yet — spec Phase 6).
+# Expect no local render/perf on Mac; this unblocks the o3de-client role while
+# native Apple-Silicon O3DE stays blocked upstream (missing arm64 DXC package).
+#
+# O3DE must NOT receive VictoriaMetrics / PromQL URLs (domain boundary).
+
+name: vectorflow3d-o3de
+
+services:
+  o3de-client:
+    profiles: ["o3de-client"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vf-o3de-client
+    env_file:
+      - path: env.example
+        required: false
+    environment:
+      VF_BRIDGE_VERSION: vf.bridge.v1
+      VF_SESSION_MODE: client
+    # Future: mount bridge socket / project gems when SGS + Gem exist
+    # volumes:
+    #   - /tmp/vf-sgs-bridge.sock:/tmp/vf-sgs-bridge.sock
+    # GPU passthrough lives in docker-compose.gpu.yml (Linux + NVIDIA only).
+    restart: unless-stopped

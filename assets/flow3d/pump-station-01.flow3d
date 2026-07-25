@@ -1,0 +1,46 @@
+# Flow3D twin wiring for Pump Station 01.
+#
+# The Flow3D DSL (spec 3.9) layers twin *semantics* onto the imported OpenUSD
+# scene: anchors + pipes (process connectivity), extra tags, and additional
+# telemetry bindings. It compiles to durable Twin-Overlay opinions with stable
+# IDs and patches the LSG in place -- it never writes USD and never carries a
+# live telemetry value, only declarative bindings.
+#
+# Selectors are the USD `vf.assetTag`s (or prim paths) from
+# assets/usd/pump-station-01/. Compile with:
+#   sgs compile assets/flow3d/pump-station-01.flow3d assets/usd/pump-station-01/pump_station.usda
+
+scene "PumpStation01"
+
+# ---- Pump hall: duty pumps feed the tank farm --------------------------------
+part PUMP-01 {
+  tag "process:water_intake"
+  meta loop = "A"
+  anchor suction   at (-1.5, 0.0, 0.0)
+  anchor discharge at (0.9, 0.0, 0.0)
+  # Efficiency is a DSL-authored derived binding not present in the USD asset.
+  bind efficiency metric("pump_efficiency_pct{asset=\"PUMP-01\"}") unit "pct" ttl 10000ms priority background
+}
+
+part PUMP-02 {
+  tag "process:water_intake"
+  meta loop = "B"
+  anchor suction   at (-1.5, 0.0, 0.0)
+  anchor discharge at ( 0.9, 0.0, 0.0)
+  bind efficiency metric("pump_efficiency_pct{asset=\"PUMP-02\"}") unit "pct" ttl 10000ms priority background
+}
+
+# ---- Tank farm ---------------------------------------------------------------
+part TANK-A {
+  anchor inlet  at (0.0, 0.0, 4.0)
+  anchor outlet at (0.0, 0.0, 0.2)
+}
+
+part TANK-B {
+  anchor inlet  at (0.0, 0.0, 4.0)
+  anchor outlet at (0.0, 0.0, 0.2)
+}
+
+# ---- Process connectivity (pipes between anchors) ----------------------------
+pipe PUMP-01.discharge -> TANK-A.inlet
+pipe PUMP-02.discharge -> TANK-B.inlet

@@ -1,0 +1,65 @@
+#usda 1.0
+(
+    """
+    VectorFlow3D component: electrical DistributionSwitch (switchgear cabinet).
+
+    Reusable component model (kind = "component"). Geometry + material + static
+    metadata DEFAULTS only; telemetry bindings live on the instancing prim in
+    the assembly layer. See ../README.md.
+    """
+    defaultPrim = "DistributionSwitch"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "DistributionSwitch" (
+    kind = "component"
+    assetInfo = {
+        string name = "vf_distribution_switch"
+        string identifier = "components/distribution_switch.usda"
+    }
+    customData = {
+        dictionary vf = {
+            string class = "distribution_switch"
+            string category = "electrical"
+            string manufacturer = "Voltra Switchgear"
+            string model = "DSW-480"
+            string ratedVoltageV = "480"
+            string ratedCurrentA = "600"
+        }
+    }
+)
+{
+    def Scope "Materials"
+    {
+        def Material "CabinetPaint"
+        {
+            token outputs:surface.connect = </DistributionSwitch/Materials/CabinetPaint/Surface.outputs:surface>
+
+            def Shader "Surface"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.2, 0.35, 0.5)
+                float inputs:metallic = 0.2
+                float inputs:roughness = 0.6
+                token outputs:surface
+            }
+        }
+    }
+
+    def Scope "Geom"
+    {
+        # Free-standing switchgear cabinet.
+        def Cube "Cabinet" (
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            double size = 1
+            float3[] extent = [(-0.5, -0.5, -0.5), (0.5, 0.5, 0.5)]
+            rel material:binding = </DistributionSwitch/Materials/CabinetPaint>
+            double3 xformOp:translate = (0, 0, 1.0)
+            double3 xformOp:scale = (0.8, 0.6, 2.0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+    }
+}

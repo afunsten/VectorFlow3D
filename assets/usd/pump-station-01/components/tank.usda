@@ -1,0 +1,79 @@
+#usda 1.0
+(
+    """
+    VectorFlow3D component: vertical storage Tank.
+
+    Reusable component model (kind = "component"). Geometry + material + static
+    metadata DEFAULTS only; telemetry bindings live on the instancing prim in
+    the assembly layer. See ../README.md.
+    """
+    defaultPrim = "Tank"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "Tank" (
+    kind = "component"
+    assetInfo = {
+        string name = "vf_tank"
+        string identifier = "components/tank.usda"
+    }
+    customData = {
+        dictionary vf = {
+            string class = "tank"
+            string category = "storage"
+            string manufacturer = "Northwind Vessels"
+            string model = "ST-5000"
+            string capacityGal = "5000"
+            string fluid = "process_water"
+        }
+    }
+)
+{
+    def Scope "Materials"
+    {
+        def Material "TankShell"
+        {
+            token outputs:surface.connect = </Tank/Materials/TankShell/Surface.outputs:surface>
+
+            def Shader "Surface"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.75, 0.78, 0.8)
+                float inputs:metallic = 0.9
+                float inputs:roughness = 0.55
+                token outputs:surface
+            }
+        }
+    }
+
+    def Scope "Geom"
+    {
+        # Vertical shell (axis = Z, Z-up stage).
+        def Cylinder "Shell" (
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            uniform token axis = "Z"
+            double height = 4.0
+            double radius = 1.5
+            float3[] extent = [(-1.5, -1.5, -2.0), (1.5, 1.5, 2.0)]
+            rel material:binding = </Tank/Materials/TankShell>
+            double3 xformOp:translate = (0, 0, 2.1)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        # Concrete pad / base ring.
+        def Cube "Base" (
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            double size = 1
+            float3[] extent = [(-0.5, -0.5, -0.5), (0.5, 0.5, 0.5)]
+            rel material:binding = </Tank/Materials/TankShell>
+            double3 xformOp:translate = (0, 0, 0.05)
+            double3 xformOp:scale = (3.4, 3.4, 0.2)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+    }
+}

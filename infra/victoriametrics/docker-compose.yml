@@ -1,0 +1,48 @@
+# VectorFlow3D — VictoriaMetrics (dev, single-node)
+#
+# Spec: metrics TSDB + PromQL for lazy resolvers. VM scrapes Prometheus-format
+# targets itself — no Prometheus server in front.
+#
+# Start:  docker compose -f infra/victoriametrics/docker-compose.yml up -d
+# UI:     http://localhost:8428/vmui
+# Query:  http://localhost:8428/api/v1/query?query=up
+#
+# Historical CSV / IoT: import into VM (not into the SGS resolver).
+#   https://docs.victoriametrics.com/victoriametrics/single-server-victoriametrics/#how-to-import-data-in-csv
+#
+# Later: replace this file with cluster compose (vmstorage / vminsert / vmselect)
+# without changing resolver PromQL URLs if you put a reverse proxy in front.
+
+name: vectorflow3d-vm
+
+services:
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.147.0
+    container_name: vf-victoriametrics
+    ports:
+      - "8428:8428" # HTTP / PromQL / vmui / remote write
+    volumes:
+      - vmdata:/storage
+      - ./scrape.yml:/etc/victoriametrics/scrape.yml:ro
+    command:
+      - "--storageDataPath=/storage"
+      - "--httpListenAddr=:8428"
+      - "--retentionPeriod=90d"
+      - "--promscrape.config=/etc/victoriametrics/scrape.yml"
+      # Useful when multiple scrapers / agents write the same series in HA setups
+      - "--dedup.minScrapeInterval=15s"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O - http://127.0.0.1:8428/health >/dev/null 2>&1 || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  vmdata:
+    name: vf-victoriametrics-data

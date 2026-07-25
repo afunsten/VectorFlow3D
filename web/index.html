@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VectorFlow3D — Observer (WebGPU)</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ok: #4ade80;
+        --stale: #fbbf24;
+        --unavailable: #f87171;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0b0f14;
+        color: #d7dde5;
+        font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+        overflow: hidden;
+      }
+      #gpu {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+      #hud {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        max-width: 340px;
+        padding: 12px 14px;
+        background: rgba(10, 15, 22, 0.82);
+        border: 1px solid #1f2a37;
+        border-radius: 8px;
+        backdrop-filter: blur(4px);
+      }
+      #hud h1 {
+        margin: 0 0 6px;
+        font-size: 13px;
+        letter-spacing: 0.02em;
+      }
+      #hud .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      #hud .muted {
+        color: #7c8896;
+      }
+      #hud .status {
+        color: var(--stale);
+      }
+      #hud.connected .status {
+        color: var(--ok);
+      }
+      #hud .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-right: 10px;
+      }
+      #hud .swatch {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        display: inline-block;
+      }
+      #hud .keys {
+        margin-top: 8px;
+        color: #96a2b1;
+      }
+      #hud input {
+        width: 190px;
+        background: #0e141c;
+        border: 1px solid #24303f;
+        color: #d7dde5;
+        border-radius: 4px;
+        padding: 2px 5px;
+        font: inherit;
+      }
+      #err {
+        position: fixed;
+        inset: auto 12px 12px 12px;
+        padding: 10px 12px;
+        background: rgba(60, 12, 12, 0.9);
+        border: 1px solid #7f1d1d;
+        border-radius: 8px;
+        color: #fecaca;
+        display: none;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="gpu"></canvas>
+    <div id="hud">
+      <h1>VectorFlow3D · observer (WebGPU)</h1>
+      <div class="row"><span class="muted">endpoint</span><input id="ws" spellcheck="false" /></div>
+      <div class="row"><span class="muted">status</span><span id="status" class="status">connecting…</span></div>
+      <div class="row"><span class="muted">boxes</span><span id="count">0</span></div>
+      <div class="row"><span class="muted">scene rev</span><span id="rev">0</span></div>
+      <div class="row"><span class="muted">selected</span><span id="sel">—</span></div>
+      <div class="legend keys">
+        <span><span class="swatch" style="background: var(--ok)"></span>ok</span>
+        <span><span class="swatch" style="background: var(--stale)"></span>stale</span>
+        <span><span class="swatch" style="background: var(--unavailable)"></span>unavailable</span>
+      </div>
+      <div class="keys">
+        drag = orbit · scroll = zoom · click = pick · <b>P</b> = pin selected · <b>U</b> = unpin
+      </div>
+    </div>
+    <div id="err"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

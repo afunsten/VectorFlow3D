@@ -1,0 +1,31 @@
+{
+  "name": "vf-pixelstreaming-reference-streamer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VectorFlow3D Pixel Streaming reference streamer + integration/CI harness (synthetic frames over WebRTC to Wilbur).",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/src/index.js",
+    "dev": "tsx src/index.ts",
+    "harness": "node dist/harness/receiver.js",
+    "harness:dev": "tsx harness/receiver.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "canvas": "^3.1.0",
+    "werift": "^0.22.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

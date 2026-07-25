@@ -1,0 +1,24 @@
+# Prometheus-format scrape config consumed by VictoriaMetrics (--promscrape.config).
+# Add IoT / exporter jobs here as targets appear. Resolver stays PromQL-only.
+
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+
+scrape_configs:
+  # Self-monitor so /api/v1/query?query=up returns data immediately after boot.
+  - job_name: victoriametrics
+    static_configs:
+      - targets:
+          - localhost:8428
+        labels:
+          env: dev
+          service: vectorflow3d
+
+  # Example — uncomment and point at real exporters when ready:
+  # - job_name: iot-exporters
+  #   static_configs:
+  #     - targets:
+  #         - host.docker.internal:9100
+  #       labels:
+  #         site: plant-a

@@ -1,0 +1,6 @@
+# VectorFlow3D — local / shared Docker infra (metrics only by default)
+
+name: vectorflow3d
+
+include:
+  - path: victoriametrics/docker-compose.yml

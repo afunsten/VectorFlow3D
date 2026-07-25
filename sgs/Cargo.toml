@@ -1,0 +1,32 @@
+[package]
+name = "vectorflow-sgs"
+version = "0.1.0"
+edition = "2021"
+description = "VectorFlow3D Scene Graph Service (Phase 1: OpenUSD index / LSG + SQLite Twin Overlay)"
+license = "Apache-2.0"
+
+[[bin]]
+name = "sgs"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rusqlite = { version = "0.32", features = ["bundled"] }
+clap = { version = "4", features = ["derive", "env"] }
+anyhow = "1"
+thiserror = "1"
+twox-hash = "1.6"
+sha2 = "0.10"
+libc = "0.2"
+ureq = "2"
+# Sync/blocking WebSocket (no tokio) for the Phase 5.5 observer bridge; handshake
+# only — no TLS deps (the ws:// data path terminates behind the edge).
+tungstenite = { version = "0.30", default-features = false, features = ["handshake"] }
+
+[dev-dependencies]
+proptest = "1"
+tempfile = "3"
+
+[profile.release]
+opt-level = 3
