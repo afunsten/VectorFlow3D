@@ -1,6 +1,6 @@
 # VectorFlow3D
 
-Open, renderer-agnostic digital twin runtime: massive OpenUSD worlds, selective high-fidelity viewers, live telemetry via VictoriaMetrics, and an O3DE client.
+Open-source, renderer-agnostic digital twin runtime: massive OpenUSD worlds, selective high-fidelity viewers, live telemetry via VictoriaMetrics, and an O3DE client.
 
 Architecture: [vectorflow3d-spec-scenegraph.md](vectorflow3d-spec-scenegraph.md)
 
